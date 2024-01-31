@@ -19,7 +19,7 @@ I would most appreciate contributions from anyone. If you encounter any bugs or 
 - To contact me: **metinnbolatt@gmail.com**
 
 Thank you for your interest in this project!
-# Usage
+## Usage
 - Clone this project to your local environment
 - Edit **.env** file. You are going to need:
   - **TMDB_ENDPOINT**
