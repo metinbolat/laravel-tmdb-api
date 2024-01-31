@@ -12,9 +12,9 @@ class Cast extends Model
 
     protected $fillable = ['tmdb_id', 'name', 'slug', 'castable_id', 'castable_type', 'poster_path'];
 
-    public function castable()
+    public function movies()
     {
-        $this->morphTo();
+        return $this->morphedByMany(Movie::class, 'castable');
     }
 
     public function tvshows()

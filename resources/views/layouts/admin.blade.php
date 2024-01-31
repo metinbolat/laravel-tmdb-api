@@ -22,7 +22,7 @@
     <!-- endinject -->
     <link rel="shortcut icon" href="{{\App\Models\Setting::find(1)->site_favicon}}" type="image/x-icon">
     <!-- Amsify Css -->
-    <link rel="stylesheet" href="{{asset('assets/select2/select2.min.css')}}">
+    @stack('style')
     @livewireStyles
 </head>
 
@@ -67,15 +67,11 @@
     <script src="{{asset('assets/admin/js/dataTables.bootstrap4.js')}}"></script>
     <!-- End custom js for this page-->
     <!-- Amsify JS-->
-    <script src="{{asset('assets/select2/select2.min.js')}}"></script>
+
     <!-- ijaboViewer JS-->
     <script src="{{asset('assets/admin/js/jquery.ijaboViewer.min.js')}}"></script>
     @livewireScripts
     @stack('script')
-    @stack('style')
-    <script>
-        $('input[name="movie_tags"]').amsifySuggestags();
-    </script>
 </body>
 
 </html>

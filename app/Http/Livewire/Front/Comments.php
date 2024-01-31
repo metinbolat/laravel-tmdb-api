@@ -4,27 +4,24 @@ namespace App\Http\Livewire\Front;
 
 use Livewire\Component;
 use App\Models\Comment;
-use App\Models\Movie;
 use Carbon\Carbon;
 
 class Comments extends Component
 {
-    public $movie, $comment, $name, $comment_body, $movie_id, $findMovie, $comments, $reply, $comment_id;
-
+    public $movie, $comment, $name, $comment_body, $comments, $reply = '';
 
 
     public function commentStore ()
     {
         $date = Carbon::now();
         $movie = $this->movie;
-        $findMovie = Movie::findorFail($movie->id);
         $this->validate([
             'comment_body' => 'required',
         ]);
         $userId = auth()->id();
 
-        if (\Auth::user()) {
-            $userName = auth()->user()->name;
+        if (auth()->user()) {
+            $userName = auth()->user->name;
             $status = 1;
 
         } else {
@@ -33,7 +30,7 @@ class Comments extends Component
         }
         $comment = Comment::create([
             'comment' => $this->comment_body,
-            'movie_id' => $findMovie->id,
+            'movie_id' => $movie->id,
             'user_id' => $userId,
             'user_name' => $userName,
             'is_public' => $status,
@@ -48,57 +45,48 @@ class Comments extends Component
         }
     }
 
-    public function replyStore (int $comment_id)
+    public function replyStore ($comment_id)
     {
+        $findComment = Comment::findOrFail($comment_id);
         $movie = $this->movie;
-        $this->comment_id = $comment_id;
-        dd($comment_id);
-        $findComment = Comment::findOrFail($comment->id);
-        $movie = $comment->movie->id;
         //dd($comment);
         $date = Carbon::now();
-        $this->validate([
+        $validatedReply = $this->validate([
             'reply' => 'required',
         ]);
-        $userId = auth()->id();
-
-        if (\Auth::user()) {
+        if (auth()->user()) {
+            $userId = auth()->user()->id;
             $userName = auth()->user()->name;
             $status = 1;
 
         } else {
-            $userName = $request->name;
+            $userName = $this->name;
             $status = siteInfo()->comment_approval;
         }
-        $comment = Comment::insert([
-            'comment' => $this->reply,
+        $comment = Comment::create([
+            'comment' => $validatedReply['reply'],
             'parent_id' => $findComment->id,
-            'movie_id' => $movie,
+            'movie_id' => $movie->id,
             'user_id' => $userId,
             'user_name' => $userName,
             'is_public' => $status,
-            'created_at' => $date,
         ]);
+        $this->comments = $movie->comments()->with('replies')->where('is_public', 1)->latest()->get();
         if ($comment){
             session()->flash('comment_success', 'Yorum eklendi.');
         } else {
             session()->flash('comment_error','Yorumunuz kaydedilirken bir hata oluştu!');
         }
+        $this->reset('reply');
     }
 
     public function mount ($movie)
     {
-        $comments = Comment::where('is_public', 1)->latest()->get();
-        //$comments = $movie->comments->where('is_public', 1)->orderBy('created_at', 'desc')->paginate(6);
-        $replies = $movie->comments;
-        $this->comments = $comments;
+        $this->comments = $movie->comments()->with('replies')->where('is_public', 1)->latest()->get();
     }
 
     public function render()
     {
-        $movie = $this->movie;
-
-
         return view('livewire.front.comments');
     }
 }

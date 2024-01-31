@@ -6,25 +6,13 @@
                 <div class="d-flex align-items-end flex-wrap">
 
                     <div class="me-md-3 me-xl-5">
-                        <h2>Welcome back, {{Auth::user()->name}}</h2>
+                        <h2>Hoşgeldiniz, {{Auth::user()->name}}</h2>
                     </div>
                     <div class="d-flex">
                         <i class="mdi mdi-home text-muted hover-cursor"></i>
                         <p class="text-muted mb-0 hover-cursor">&nbsp;/&nbsp;Dashboard&nbsp;/&nbsp;</p>
                         <p class="text-primary mb-0 hover-cursor">Analytics</p>
                     </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-end flex-wrap">
-                    <button type="button" class="btn btn-light bg-white btn-icon me-3 d-none d-md-block ">
-                        <i class="mdi mdi-download text-muted"></i>
-                    </button>
-                    <button type="button" class="btn btn-light bg-white btn-icon me-3 mt-2 mt-xl-0">
-                        <i class="mdi mdi-clock-outline text-muted"></i>
-                    </button>
-                    <button type="button" class="btn btn-light bg-white btn-icon me-3 mt-2 mt-xl-0">
-                        <i class="mdi mdi-plus text-muted"></i>
-                    </button>
-                    <button class="btn btn-primary mt-2 mt-xl-0">Generate report</button>
                 </div>
             </div>
         </div>
@@ -67,21 +55,14 @@
                                     <i class="mdi mdi-eye me-3 icon-lg text-success"></i>
                                     <div class="d-flex flex-column justify-content-around">
                                         <small class="mb-1 text-muted">Toplam İzlenme</small>
-                                        <h5 class="me-2 mb-0">9833550</h5>
+                                        <h5 class="me-2 mb-0">{{$totalVisits}}</h5>
                                     </div>
                                 </div>
                                 <div class="d-flex border-md-right flex-grow-1 align-items-center justify-content-center p-3 item">
-                                    <i class="mdi mdi-download me-3 icon-lg text-warning"></i>
+                                    <i class="mdi mdi-comment me-3 icon-lg text-warning"></i>
                                     <div class="d-flex flex-column justify-content-around">
-                                        <small class="mb-1 text-muted">Downloads</small>
-                                        <h5 class="me-2 mb-0">2233783</h5>
-                                    </div>
-                                </div>
-                                <div class="d-flex py-3 border-md-right flex-grow-1 align-items-center justify-content-center p-3 item">
-                                    <i class="mdi mdi-flag me-3 icon-lg text-danger"></i>
-                                    <div class="d-flex flex-column justify-content-around">
-                                        <small class="mb-1 text-muted">Flagged</small>
-                                        <h5 class="me-2 mb-0">3497843</h5>
+                                        <small class="mb-1 text-muted">Yorum Sayısı</small>
+                                        <h5 class="me-2 mb-0">{{$totalComments}}</h5>
                                     </div>
                                 </div>
                             </div>

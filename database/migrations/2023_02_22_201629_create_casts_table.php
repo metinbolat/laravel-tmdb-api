@@ -18,8 +18,6 @@ return new class extends Migration
             $table->bigInteger('tmdb_id')->unique();
             $table->string('name');
             $table->string('slug');
-            $table->integer('castable_id');
-            $table->string('castable_type');
             $table->string('poster_path')->nullable();
             $table->timestamps();
         });

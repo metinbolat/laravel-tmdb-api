@@ -11,8 +11,8 @@ class Trailer extends Model
 
     protected $fillable = ['name', 'embed_html'];
 
-    public function trailerable()
+    public function movies()
     {
-        $this->morphTo();
+        return $this->morphedByMany(Movie::class, 'trailerable');
     }
 }

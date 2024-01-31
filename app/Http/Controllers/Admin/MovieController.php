@@ -3,56 +3,51 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Movie;
-use App\Models\Tag;
-use App\Models\Genre;
-use App\Models\Comment;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Http;
+use App\Http\Requests\Admin\UpdateMovieRequest;
+use App\Services\MovieSyncService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use App\Models\{Tag, Genre, Comment, Movie};
 use Illuminate\Support\Str;
-use function MongoDB\BSON\toJSON;
 
 class MovieController extends Controller
 {
-    public function edit ($id)
+    public function edit(Movie $movie): View
     {
         $genres = Genre::all();
         $tags = Tag::all();
-        $movie = Movie::find($id);
         return view('admin.edit-movie', compact('movie', 'tags', 'genres'));
     }
 
-    public function update (Request $request, $id)
+    public function update(UpdateMovieRequest $request, Movie $movie): RedirectResponse
     {
-        $movie = Movie::findorFail($id);
-        $movie->title = $request->title;
-        $movie->release_date = $request->year;
-        $movie->runtime = $request->runtime;
-        $movie->lang = $request->language;
-        $movie->is_public = $request->status;
-        $movie->slug = Str::slug($request->title);
-        $movie->rating = $request->rating;
-        $movie->poster_path = $request->poster;
-        $movie->backdrop_path = $request->backdrop;
-        $movie->overview = $request->overview;
-        $movie->country = $request->country;
-        $movie->source = $request->source;
-        $movie->meta = $request->meta;
-        $movie->save();
-        $movie->tags()->sync($request->tags);
-
-//        $movie->genres()->sync($request->genres);
-
-        if ($movie) {
-            return redirect()->back()->with('status', 'Film Güncellendi');
-        } else {
+        try {
+            $movie->update([
+                'title' => $request->title,
+                'release_date' => $request->year,
+                'runtime' => $request->runtime,
+                'lang' => $request->language,
+                'is_public' => $request->is_public,
+                'slug' => Str::slug($request->title),
+                'rating' => $request->rating,
+                'poster_path' => $request->poster_path,
+                'backdrop_path' => $request->backdrop_path,
+                'overview' => $request->overview,
+                'country' => $request->country,
+                'source' => $request->source,
+                'meta' => $request->meta,
+            ]);
+            $syncTags = new MovieSyncService();
+            $syncTags->syncTags($movie, $request->tags);
+            $syncTags->syncGenres($movie, $request->genres);
+        } catch (\Exception $exception) {
             return redirect()->back()->with('error', 'Film Güncellenemedi');
         }
+        return redirect()->back()->with('status', 'Film Güncellendi');
 
     }
 
-    public function commentsIndex ()
+    public function commentsIndex(): View
     {
         $comments = Comment::orderBy('created_at', 'desc')->paginate(6);
         return view('admin.comments', compact('comments'));

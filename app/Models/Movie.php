@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Movie extends Model
 {
@@ -28,33 +30,29 @@ class Movie extends Model
         'country'
     ];
 
-    public function genres()
+    public function genres():MorphToMany
     {
-        return $this->morphMany(Genre::class, 'genreable');
+        return $this->morphToMany(Genre::class, 'genreable');
     }
 
-    public function trailers()
+    public function trailers():MorphToMany
     {
-        return $this->morphMany(Trailer::class, 'trailerable');
+        return $this->morphToMany(Trailer::class, 'trailerable');
     }
 
-    public function tags()
+    public function tags():MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable');
     }
 
-    public function casts()
+    public function casts():MorphToMany
     {
-        return $this->morphMany(Cast::class, 'castable');
+        return $this->morphToMany(Cast::class, 'castable');
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class)->whereNull('parent_id');
     }
 
-    public function incrementVisitCount() {
-    $this->visits++;
-    return $this->save();
-}
 }

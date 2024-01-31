@@ -46,14 +46,6 @@
 
                 <!-- player -->
                 <div class="col-12">
-                    <div class="dropdown">
-                        <button class="dropdown-btn">Dropdown Button</button>
-                        <div class="dropdown-content">
-                            <a href="#">Option 1</a>
-                            <a href="#">Option 2</a>
-                            <a href="#">Option 3</a>
-                        </div>
-                    </div>
                     <div class="card card--details card--series align-content-center">
                         <div class="row">
                             <!-- card content -->

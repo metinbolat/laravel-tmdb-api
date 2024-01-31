@@ -170,7 +170,7 @@ $(document).ready(function () {
 	Gallery
 	==============================*/
 	var initPhotoSwipeFromDOM = function(gallerySelector) {
-		// parse slide data (url, title, size ...) from DOM elements 
+		// parse slide data (url, title, size ...) from DOM elements
 		// (children of gallerySelector)
 		var parseThumbnailElements = function(el) {
 			var thumbElements = el.childNodes,
@@ -185,7 +185,7 @@ $(document).ready(function () {
 
 				figureEl = thumbElements[i]; // <figure> element
 
-				// include only element nodes 
+				// include only element nodes
 				if(figureEl.nodeType !== 1) {
 					continue;
 				}
@@ -203,13 +203,13 @@ $(document).ready(function () {
 
 				if(figureEl.children.length > 1) {
 					// <figcaption> content
-					item.title = figureEl.children[1].innerHTML; 
+					item.title = figureEl.children[1].innerHTML;
 				}
 
 				if(linkEl.children.length > 0) {
 					// <img> thumbnail element, retrieving thumbnail url
 					item.msrc = linkEl.children[0].getAttribute('src');
-				} 
+				}
 
 				item.el = figureEl; // save link to element for getThumbBoundsFn
 				items.push(item);
@@ -248,8 +248,8 @@ $(document).ready(function () {
 				index;
 
 			for (var i = 0; i < numChildNodes; i++) {
-				if(childNodes[i].nodeType !== 1) { 
-					continue; 
+				if(childNodes[i].nodeType !== 1) {
+					continue;
 				}
 
 				if(childNodes[i] === clickedListItem) {
@@ -280,10 +280,10 @@ $(document).ready(function () {
 				if(!vars[i]) {
 					continue;
 				}
-				var pair = vars[i].split('=');  
+				var pair = vars[i].split('=');
 				if(pair.length < 2) {
 					continue;
-				}           
+				}
 				params[pair[0]] = pair[1];
 			}
 
@@ -312,7 +312,7 @@ $(document).ready(function () {
 					// See Options -> getThumbBoundsFn section of documentation for more info
 					var thumbnail = items[index].el.getElementsByTagName('img')[0], // find thumbnail
 						pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
-						rect = thumbnail.getBoundingClientRect(); 
+						rect = thumbnail.getBoundingClientRect();
 
 					return {x:rect.left, y:rect.top + pageYScroll, w:rect.width};
 				}
@@ -322,7 +322,7 @@ $(document).ready(function () {
 			// PhotoSwipe opened from URL
 			if(fromURL) {
 				if(options.galleryPIDs) {
-					// parse real index when custom PIDs are used 
+					// parse real index when custom PIDs are used
 					// http://photoswipe.com/documentation/faq.html#custom-pid-in-url
 					for(var j = 0; j < items.length; j++) {
 						if(items[j].pid == index) {
@@ -437,9 +437,12 @@ $(document).ready(function () {
 				document.getElementById('filter__imbd-end')
 			];
 
-			secondSlider.noUiSlider.on('update', function( values, handle ) {
-				secondValues[handle].innerHTML = values[handle];
-			});
+            secondSlider.noUiSlider.on('update', function(values, handle) {
+                secondValues[handle].innerHTML = values[handle];
+
+                // Emit a Livewire event with the new values
+                window.livewire.emit('sliderUpdated', { start: values[0], end: values[1] });
+            });
 
 			$('.filter__item-menu--range').on('click.bs.dropdown', function (e) {
 				e.stopPropagation();

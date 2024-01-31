@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('settings', function (Blueprint $table) {
-            $table->boolean('comment_approval')->default(0);
+        Schema::create('taggables', function (Blueprint $table) {
+            $table->foreignId('tag_id')->constrained();
+            $table->morphs('taggable');
         });
     }
 
@@ -25,8 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('settings', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('taggables');
     }
 };

@@ -9,5 +9,3 @@ if (!function_exists('siteInfo')) {
 }
 
 
-
-?>

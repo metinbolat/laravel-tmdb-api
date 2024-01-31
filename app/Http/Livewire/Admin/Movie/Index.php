@@ -2,35 +2,29 @@
 
 namespace App\Http\Livewire\Admin\Movie;
 
-use App\Models\Cast;
-use App\Models\Genre;
-use App\Models\Movie;
-use App\Models\Trailer;
-use Illuminate\Support\Arr;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithPagination;
-use function PHPUnit\Framework\returnArgument;
+use App\Models\{Cast, Genre, Movie, Trailer};
+use App\Services\StringProcessService;
+
 
 class Index extends Component
 {
     use WithPagination;
-    public $checked = [];
-    public $selectAll = false;
-    public $selectAllDB = false;
-    public $bulkUpdate = 'display:none';
-    public $searchResults = [];
-    public $search = '';
+
+    public array $checked = [];
+    public bool $selectAll = false;
+    public bool $selectAllDB = false;
+    public string $bulkUpdate = 'display:none';
+    public array $searchResults = [];
+    public string $search = '';
     //public $sort = 'asc';
-    public $sortColumn = 'title';
-    public $sortDirection = 'asc';
-    public $perPage = 10;
-    public $title, $runtime, $lang, $videoFormat, $rating, $posterPath,
-        $backdropPath, $overview, $status, $movieTMDB, $movie_id,
-        $trailerId, $trailerName, $embedHtml, $movie, $resultId, $meta;
-    public $seriesTMDB, $seriesId, $searchSeries;
+    public string $sortColumn = 'title';
+    public string $sortDirection = 'asc';
+    public int $perPage = 10;
+    public $movieTMDB, $movie, $resultId;
 
     protected $paginationTheme = "bootstrap";
 
@@ -55,7 +49,7 @@ class Index extends Component
     public function updatedSelectAll($value)
     {
         if ($value) {
-            $this->checked = $this->movies->pluck('id')->map(fn($item) => (string) $item)->toArray();
+            $this->checked = $this->movies->pluck('id')->map(fn($item) => (string)$item)->toArray();
         } else {
             $this->checked = [];
         }
@@ -67,10 +61,10 @@ class Index extends Component
         $this->selectAll = false;
     }
 
-    public function selectAllDB ()
+    public function selectAllDB()
     {
         $this->selectAllDB = true;
-        $this->checked = $this->moviesQuery->pluck('id')->map(fn($item) => (string) $item)->toArray();
+        $this->checked = $this->moviesQuery->pluck('id')->map(fn($item) => (string)$item)->toArray();
     }
 
     public function resetInput()
@@ -84,6 +78,7 @@ class Index extends Component
         $this->trailerId = NULL;
         $this->embedHtml = NULL;
     }
+
     public function hydrate()
     {
         $this->resetErrorBag();
@@ -96,156 +91,95 @@ class Index extends Component
             'movieTMDB' => 'required|min:3'
         ]);
 
-            $searchResults = Http::get(config('services.tmdb.endpoint').'search/movie'. '?api_key='.
-                config('services.tmdb.api').'&query='.$this->movieTMDB.'&language='.config('services.tmdb.lang'))
-                ->json()['results'];
-            $this->searchResults = $searchResults;
+        $searchResults = Http::get(config('services.tmdb.endpoint') . 'search/movie' . '?api_key=' .
+            config('services.tmdb.api') . '&query=' . $validateData['movieTMDB'] . '&language=' . config('services.tmdb.lang'))
+            ->json()['results'];
 
-        return $this->searchResults;
-    }
-
-    public function searchResultsSeries()
-    {
-        $validateData = $this->validate([
-            'seriesTMDB' => 'required|min:3'
-        ]);
-
-        $searchSeries = Http::get(config('services.tmdb.endpoint').'tv/'.$this->seriesTMDB. '?api_key='.
-            config('services.tmdb.api').'&language='.config('services.tmdb.lang'))
-            ->json();
-        $searchResults = $searchSeries['seasons'];
         $this->searchResults = $searchResults;
-dd(count($searchSeries['seasons']));
+
         return $this->searchResults;
     }
 
-    public function changeLocale($string)
-    {
-        $search = array('en', 'tr','AR','AU','AT','BE','BR','zh','CO','DK','fr','de','IN','it','ja','MX','NL','ru','es','TH','uk','ko','SE','NZ','bg','
-        ar','BY','CH','CZ','FI','HK','HU','IE','IR','KH','LB','LT','LU','MA','MM','MW','NO','NZ','PE','PH','pl','pt','RO','SU','TW','ZA');
-        $replace = array('İngilizce', 'Türkçe','Arjantin','Avustralya','Avusturya','Belçika','Brezilya','Çince','Kolombiya','Danimarka','Fransızca',
-            'Almanca','Hindistan','İtalyanca','Japonca','Meksika','Hollanda','Rusça','İspanyolca','Tayland','Ukraynaca','Korece','İsveç','Yeni Zelanda','Bulgarca',
-            'Arapça','Beyaz Rusya','İsviçre','Çek Cumhuriyeti','Finlandiya','Hong Kong','Macaristan','İrlanda','İran','Kamboçya',
-            'Lübnan','Litvanya','Lüksemburg','Fas','Burma','Malavi','Norveç','Yeni Zelanda','Peru','Filipinler','Lehçe','Portekizce','Romanya','Sovyetler Birliği',
-            'Tayvan','Zambiya');
-
-        return Str::replace($search, $replace, $string);
-    }
-
-    public function changeCountry($string)
-    {
-        $search = array('US', 'GB', 'TR', 'CA','AR','AU','AT','BE','BR','CN','CO','DK','FR','DE','IN','IT','JP','MX','NL','RU','ES','TH','UA','KR','SE','NZ','BG','AE',
-        'BG','BY','CH','CZ','FI','HK','HU','IE','IR','KH','LB','LT','LU','MA','MM','MW','NO','NZ','PE','PH','PL','PT','RO','SU','TW','ZA');
-        $replace = array('ABD', 'İngiltere', 'Türkiye', 'Kanada','Arjantin','Avustralya','Avusturya','Belçika','Brezilya','Çin','Kolombiya','Danimarka','Fransa',
-        'Almanya','Hindistan','İtalya','Japonya','Meksika','Hollanda','Rusya','İspanya','Tayland','Ukrayna','Güney Kore','İsveç','Yeni Zelanda','Bulgaristan',
-        'Birleşik Arap Emirlikleri','Bulgaristan','Beyaz Rusya','İsviçre','Çek Cumhuriyeti','Finlandiya','Hong Kong','Macaristan','İrlanda','İran','Kamboçya',
-        'Lübnan','Litvanya','Lüksemburg','Fas','Burma','Malavi','Norveç','Yeni Zelanda','Peru','Filipinler','Polonya','Portekiz','Romanya','Sovyetler Birliği',
-        'Tayvan','Zambiya');
-
-        return Str::replace($search, $replace, $string);
-    }
-
-    public function getSeries($seriesId)
-    {
-        $series = config('services.tmdb.endpoint').'tv/'.$seriesId. '?api_key='.
-            config('services.tmdb.api').'&language='.config('services.tmdb.lang');
-        $apiSeries = Http::get($series);
-        $newSeries = $apiSeries->json();
-        dd($newSeries['seasons']);
-    }
-
-    public function generateMovie($resultId)
+    public function generateMovie($resultId, StringProcessService $stringProcess)
     {
         $movie = Movie::where('tmdb_id', $resultId)->exists();
-        if ($movie){
-            return session()->flash('error', 'Film, zaten sitenizde mevcut.');
+        if ($movie) {
+            session()->flash('bot-error', 'Film, zaten sitenizde mevcut.');
+            return;
         }
 
-        $url = config('services.tmdb.endpoint').'movie/'.$resultId. '?api_key='.
-            config('services.tmdb.api').'&language='.config('services.tmdb.lang');
-        $credits = config('services.tmdb.endpoint').'movie/'.$resultId.'/credits'. '?api_key='.
-            config('services.tmdb.api').'&language='.config('services.tmdb.lang');
-//        $cast = config('services.tmdb.endpoint').'movie/'.$this->movieTMDBId.'/credits'. '?api_key='.
-//            config('services.tmdb.api').'&language='.config('services.tmdb.lang');
-//        $apiCast = Http::get($cast);
-//        $newCast = $apiCast->json();
-        $apiMovie = Http::get($url);
-        $apiCredits = Http::get($credits);
+        $apiMovie = Http::get(config('services.tmdb.endpoint') . 'movie/' . $resultId . '?api_key=' .
+            config('services.tmdb.api') . '&language=' . config('services.tmdb.lang'));
+        $apiCredits = Http::get(config('services.tmdb.endpoint') . 'movie/' . $resultId . '/credits' . '?api_key=' .
+            config('services.tmdb.api') . '&language=' . config('services.tmdb.lang'));
 
-        if ($apiMovie->successful()) {
-            $newMovie = $apiMovie->json();
-            $locale = $this->changeCountry($newMovie['production_countries'][0]['iso_3166_1']);
-            $lang = $this->changeLocale($newMovie['original_language']);
-            $date = strtotime($newMovie['release_date']);
-            $getDate = getDate($date);
-            $year = $getDate['year'];
-            //dd($getDate['year']);
-
-            $created_movie = Movie::create([
-                'tmdb_id' => $newMovie['id'],
-                'title' => $newMovie['title'].' izle',
-                'slug' => Str::slug($newMovie['title']. ' izle'),
-                'release_date' => $year,
-                'runtime' => $newMovie['runtime'],
-                'rating' => $newMovie['vote_average'],
-                'lang' => $lang,
-                'video_format' => 'HD',
-                'is_public' => false,
-                'overview' => $newMovie['overview'],
-                'country' => $locale,
-                'poster_path' => $newMovie['poster_path'],
-                'backdrop_path' => $newMovie['backdrop_path'],
-                'meta' => $newMovie['title'].' izle '. 'filmini HD izleyebilir ve ayrıca ücretsiz ve online ' .$newMovie['title'].' izle '. 'filmine erişebilir ve keyfini sürebilirsiniz.'
-            ]);
-
-            $newCast = $apiCredits->json();
-            //$arrayCast = $newCast['cast'];
-            $cast = array();
-            for($i=0;$i<5 ; $i++)
-            {
-                $cast[$i] = $newCast['cast'][$i];
-                $checkCast = Cast::get('tmdb_id');
-
-                if (!$checkCast->contains('tmdb_id', $cast[$i]['id'])){
-                    $addCast = $created_movie->casts()->create([
-                        'tmdb_id' => $cast[$i]['id'],
-                        'name' => $cast[$i]['name'],
-                        'slug' => Str::slug($cast[$i]['name']),
-                        'poster_path' => $cast[$i]['profile_path'],
-                    ]);
-                }
-            }
-
-            $genreCount = count($newMovie['genres']);
-            for($i=0;$i<$genreCount ; $i++)
-            {
-                $genre[$i] = $newMovie['genres'][$i];
-                $checkGenre = Genre::get('tmdb_id');
-
-                if (!$checkGenre->contains('tmdb_id', $genre[$i]['id'])){
-                    $addGenre = $created_movie->genres()->create([
-                        'tmdb_id' => $genre[$i]['id'],
-                        'name' => $genre[$i]['name'],
-                        'slug' => Str::slug($genre[$i]['name']),
-                    ]);
-                }
-            }
-
-//            $movie_genres = $newMovie['genres'];
-//            //dd($newMovie['genres']);
-//            $tmdb_genre_ids = collect($movie_genres)->pluck('id');
-//            $genres = Genre::whereIn('tmdb_id', $tmdb_genre_ids)->get();
-//            $created_movie->genres()->attach($genres);
-//            $movie_casts = $newCast['cast'];
-//            $tmdb_cast_ids = collect($movie_casts)->pluck('id');
-//            $casts = Cast::whereIn('tmdb_id', $tmdb_cast_ids)->get();
-//            $created_movie->casts()->attach($casts);
-            $this->reset('resultId');
-            session()->flash('bot-status', 'Film eklendi.');
-        } else {
+        if (!$apiMovie->successful()) {
             session()->flash('bot-error', 'Film, TMDB veritabanında bulunamadı.');
             $this->reset('result');
         }
+
+        $newMovie = $apiMovie->json();
+
+        //PROCESS DATA FROM API
+        $locale = $stringProcess->changeCountry($newMovie['production_countries'][0]['iso_3166_1']);
+        $lang = $stringProcess->changeLanguage($newMovie['original_language']);
+        $getYear = getDate(strtotime($newMovie['release_date']))['year'];
+
+        $created_movie = Movie::create([
+            'tmdb_id' => $newMovie['id'],
+            'title' => $newMovie['title'] . ' izle',
+            'slug' => Str::slug($newMovie['title'] . ' izle'),
+            'release_date' => $getYear,
+            'runtime' => $newMovie['runtime'],
+            'rating' => $newMovie['vote_average'],
+            'lang' => $lang,
+            'video_format' => 'HD',
+            'is_public' => false,
+            'overview' => $newMovie['overview'],
+            'country' => $locale,
+            'poster_path' => $newMovie['poster_path'],
+            'backdrop_path' => $newMovie['backdrop_path'],
+            'meta' => $newMovie['title'] . ' izle ' . 'filmini HD izleyebilir ve ayrıca ücretsiz ve online ' . $newMovie['title'] . ' izle ' . 'filmine erişebilir ve keyfini sürebilirsiniz.'
+        ]);
+
+        //GET FIRST 5 CAST FROM API
+        $newCast = $apiCredits->json();
+        $cast = array();
+        for ($i = 0; $i < 5; $i++) {
+            $cast[$i] = $newCast['cast'][$i];
+            $checkCast = Cast::get('tmdb_id');
+
+            if (!$checkCast->contains('tmdb_id', $cast[$i]['id'])) {
+                $addCast = $created_movie->casts()->create([
+                    'tmdb_id' => $cast[$i]['id'],
+                    'name' => $cast[$i]['name'],
+                    'slug' => Str::slug($cast[$i]['name']),
+                    'poster_path' => $cast[$i]['profile_path'],
+                ]);
+            }
+        }
+
+        //GET MOVIE GENRES FROM API
+        $genreCount = count($newMovie['genres']);
+        for ($i = 0; $i < $genreCount; $i++) {
+            $genre[$i] = $newMovie['genres'][$i];
+            $checkGenre = Genre::get('tmdb_id');
+
+            if (!$checkGenre->contains('tmdb_id', $genre[$i]['id'])) {
+                $addGenre = $created_movie->genres()->create([
+                    'tmdb_id' => $genre[$i]['id'],
+                    'name' => $genre[$i]['name'],
+                    'slug' => Str::slug($genre[$i]['name']),
+                ]);
+            }
+        }
+        //ATTACH GENRES AND CAST TO MOVIE
+        $genres = Genre::whereIn('tmdb_id', collect($newMovie['genres'])->pluck('id'))->get();
+        $created_movie->genres()->sync($genres);
+        $casts = Cast::whereIn('tmdb_id', collect($newCast['cast'])->pluck('id'))->get();
+        $created_movie->casts()->sync($casts);
+        $this->reset('resultId');
+        session()->flash('bot-status', 'Film eklendi.');
     }
 
     public function closeModal()
@@ -265,7 +199,7 @@ dd(count($searchSeries['seasons']));
 
     public function addTrailer()
     {
-       $validateData = $this->validate([
+        $validateData = $this->validate([
             'trailerName' => 'required|string',
             'embedHtml' => 'required|string',
         ]);
@@ -283,53 +217,6 @@ dd(count($searchSeries['seasons']));
         $trailer = Trailer::findOrFail($trailerId);
         $trailer->delete();
         session()->flash('status', 'Fragman kaynağı silindi.');
-        $this->dispatchBrowserEvent('close-modal');
-        $this->resetInput();
-    }
-
-    public function editMovie(int $movie_id)
-    {
-
-        $this->movie_id = $movie_id;
-        $movie = Movie::findOrFail($movie_id);
-        $this->movie = Movie::findOrFail($movie_id);
-        $this->title = $movie->title;
-        $this->slug = $movie->slug;
-        $this->runtime = $movie->runtime;
-        $this->language = $movie->lang;
-        $this->format = $movie->video_format;
-        $this->rating = $movie->rating;
-        $this->poster = $movie->poster_path;
-        $this->backdrop = $movie->backdrop_path;
-        $this->overview = $movie->overview;
-        $this->status = $movie->is_public;
-        $this->meta = $movie->meta;
-    }
-
-    public function updateMovie()
-    {
-        $this->validate();
-
-//        if (strlen($this->slug)>3) {
-//            $slug=Str::slug($this->slug);
-//        } else {
-//            $slug=Str::slug($this->name);
-//        }
-
-        Movie::findOrFail($this->movie_id)->update([
-            'title' => $this->title,
-            'slug' => $this->slug,
-            'runtime' => $this->runtime,
-            'rating' => $this->rating,
-            'lang' => $this->language,
-            'video_format' => $this->format,
-            'is_public' => $this->status,
-            'overview' => $this->overview,
-            'poster_path' => $this->poster,
-            'backdrop_path' => $this->backdrop,
-            'meta' => $this->meta,
-        ]);
-        session()->flash('status', 'Film güncellendi.');
         $this->dispatchBrowserEvent('close-modal');
         $this->resetInput();
     }
@@ -379,7 +266,7 @@ dd(count($searchSeries['seasons']));
         $this->sortColumn = $column;
     }
 
-    public function resetFilters ()
+    public function resetFilters()
     {
         $this->reset(['search', 'sort', 'perPage']);
     }
@@ -396,7 +283,7 @@ dd(count($searchSeries['seasons']));
 
     public function render()
     {
-       // $moviesAll = Movie::search('title', $this->search)->orderBy($this->sortColumn, $this->sortDirection)->paginate($this->perPage);
+        // $moviesAll = Movie::search('title', $this->search)->orderBy($this->sortColumn, $this->sortDirection)->paginate($this->perPage);
         return view('livewire.admin.movie.index', ['movies' => $this->movies])
             ->extends('layouts.admin')
             ->section('content');

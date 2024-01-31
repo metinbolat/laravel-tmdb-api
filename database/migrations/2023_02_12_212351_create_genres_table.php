@@ -18,8 +18,6 @@ return new class extends Migration
             $table->bigInteger('tmdb_id')->unique()->nullable();
             $table->string('name')->unique();
             $table->string('slug');
-            $table->integer('genreable_id');
-            $table->string('genreable_type');
             $table->timestamps();
         });
     }

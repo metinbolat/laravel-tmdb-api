@@ -31,7 +31,6 @@ Route::post('/hata-bildir/{movie}', [App\Http\Controllers\WelcomeController::cla
 //Movie
 Route::get('/filmler', [App\Http\Controllers\Front\MovieController::class, 'movies'])->name('front.movie.index');
 Route::get('/filmler/{slug}', [App\Http\Controllers\Front\MovieController::class, 'show'])->name('front.movie.show');
-//Route::post('/filmler/{slug}/yorum-yap', [App\Http\Controllers\Front\MovieController::class, 'comment_store'])->name('front.comment.store');
 Route::post('/filmler/{slug}/yanitla', [App\Http\Controllers\Front\MovieController::class, 'reply_store'])->name('front.reply.store');
 Route::get('/en-cok-izlenen-filmler', [App\Http\Controllers\Front\MovieController::class, 'favoriteMovies_index'])->name('front.favorite.index');
 //Genre
@@ -61,8 +60,6 @@ Route::prefix('admin')->middleware(['auth', 'isAdmin'])->group(function () {
 
     //Genre
     Route::get('kategoriler', App\Http\Livewire\Admin\Genre\Index::class)->name('back.genre.index');
-//    Route::get('kategoriler/oluştur', [App\Http\Controllers\Admin\GenreController::class, 'create'])->name('back.genre.create');
-//    Route::post('kategoriler/oluştur', [App\Http\Controllers\Admin\GenreController::class, 'store'])->name('back.genre.add');
 
     //Movie
     Route::get('filmler', App\Http\Livewire\Admin\Movie\Index::class)->name('back.movie.index');

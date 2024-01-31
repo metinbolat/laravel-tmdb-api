@@ -13,10 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('genre_movie', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('genre_id')->nullable();
-            $table->unsignedBigInteger('movie_id')->nullable();
+        Schema::create('castables', function (Blueprint $table) {
+            $table->foreignId('cast_id')->constrained();
+            $table->morphs('castable');
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('genre_movie');
+        Schema::dropIfExists('castables');
     }
 };

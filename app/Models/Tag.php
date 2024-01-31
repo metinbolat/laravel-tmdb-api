@@ -14,8 +14,6 @@ class Tag extends Model
     protected $fillable = [
         'tag_name',
         'slug',
-        'taggable_type',
-        'taggable_id'
     ];
 
     public function movies()

@@ -212,7 +212,8 @@
     </div>
 </footer>
 <!-- end footer -->
-
+@livewireScripts
+@stack('script')
 <!-- JS -->
 <script src="{{asset('assets/front/js/jquery-3.3.1.min.js')}}"></script>
 <script src="{{asset('assets/front/js/bootstrap.bundle.min.js')}}"></script>
@@ -227,8 +228,7 @@
 <script src="{{asset('assets/front/js/photoswipe-ui-default.min.js')}}"></script>
 <script src="{{asset('assets/front/js/main.js')}}"></script>
 {{--<script src="{{asset('assets/front/js/ad.js')}}"></script>--}}
-@livewireScripts
-@stack('script')
+
 </body>
 
 </html>
